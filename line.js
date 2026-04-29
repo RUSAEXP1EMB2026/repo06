@@ -5,31 +5,28 @@ const EP_PUSH = URL_LINE + "push";
 
 const SHEET_NAME = "line_log";
 
-function doPost(e){
-  const sheet = getSheet(SHEET_NAME);
-
-  const data = JSON.parse(e.postData.contents);
-  const event = data.events[0];
-
-  let text = "";
-
-  if (event.message && event.message.type === "text") {
-    text = event.message.text;
-  } else {
-    text = "テキスト以外";
-  }
-
-  sheet.appendRow([new Date(), event.message.userId , text]);
-}
-
-function sendTextMessage(userId, message) {
-    const request = {
-        to: userId,
-        messages: [{
-            type: "text",
-            text: message
-        }]
+function doPost(e) {
+  let sheet = getSheet(SHEET_NAME);
+  sheet.appendRow([new Date(), e.postData.contents]);
+  JSON.parse(e.postData.contents).events.forEach(event => {
+    let eventType = event.type;
+    let userId = event.source.userId;
+    switch (eventType) {
+      case "message":
+        // メッセージを受け取った際の処理を記述
+        let messageType = event.message.type;
+        switch(messageType) {
+          case "text":
+            // テキストメッセージを受け取った際の処理を記述
+            sheet.appendRow([new Date(), userId, event.message.text]);
+            break;
+        }
+        break;
+      case "follow":
+        sendTextMessage(userId, "ご登録ありがとうございます！\n早速ですが、GMAILアドレスを入力してください！");
+        break;
     }
+  })
 }
 
 function sendTextMessage(userId, message) {
@@ -49,9 +46,9 @@ function sendTextMessage(userId, message) {
         }
     }
 
-    UrlFetchApp.fetch(PUSH_URL, options);
+    UrlFetchApp.fetch(EP_PUSH, options);
 }
 
 function test() {
-  sendTextMessage()
+  sendTextMessage("Ud4136dbc32cb08ff89e6cc561e7e4c9c", "これはテストです。");
 }

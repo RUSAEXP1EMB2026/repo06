@@ -5,3 +5,10 @@ class TriggerData{
         this.running = false;
     }
 }
+
+class User{
+  constructor(userId, gmail){
+    this.userId = userId;
+    this.gmail = gmail;
+  }
+}

@@ -1,9 +1,19 @@
 // APIからデータを取得する共通関数
-function getNatureRemoData(endpoint) {
-  const REMO_ACCESS_TOKEN = 'nature remo3のアクセストークン'
+function getNatureRemoData(endpoint, user_id) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("table");
+  const lastRow = sheet.getLastRow();
+  const data = sheet.getRange(1,1,lastRow,3).getValues();
+  const idList = data.map(row => row[0]);
+  const index = idList.indexOf(user_id);
+  if(index === -1){
+    throw new Error("ユーザーID:"+ user_id +"のトークンが見つかりません。");
+  }
+  const UserToken = data[index][2];
+
   const headers = {
     "Content-Type" : "application/json;",
-    'Authorization': 'Bearer ' + REMO_ACCESS_TOKEN,
+    'Authorization': 'Bearer ' + UserToken,
   };
 
   const options = {
@@ -15,8 +25,9 @@ function getNatureRemoData(endpoint) {
 }
 
 // 人感センサの値(1または0)だけを返す関数
-function getMotionStatus() {
-  const deviceData = getNatureRemoData("devices");
+function getMotionStatus(user_id) {
+  const deviceData = getNatureRemoData("devices",user_id);
+  if (!deviceData || deviceData.length === 0) return 0;
   const moEvent = deviceData[0].newest_events.mo;
   
   // センサデータがそもそも存在しない場合は0を返す
@@ -32,8 +43,7 @@ function getMotionStatus() {
   const diffMinutes = (now.getTime() - lastMotionTime.getTime()) / (1000 * 60);
   
   // 4. 何分以内の反応なら「人がいる」と判定するか（閾値）を設定
-  // 例：15分以内に反応があれば家にいるとみなす
-  const THRESHOLD_MINUTES = 15; 
+  const THRESHOLD_MINUTES = 5; 
   
   let moStatus = 0; // 初期値は0（いない）
 

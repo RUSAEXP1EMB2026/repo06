@@ -7,9 +7,10 @@ class TriggerData{
 }
 
 class User{
-  constructor(userId, gmail){
+  constructor(userId, gmail, remoToken){
     this.userId = userId;
     this.gmail = gmail;
+    this.remoToken = remoToken;
   }
 }
 

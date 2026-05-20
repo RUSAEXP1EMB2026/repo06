@@ -2,40 +2,59 @@ const SHEET_NAME = "table";
 
 const sheet = getSheet(SHEET_NAME);
 
-function createRow(id, gmail) {
-    if (!exists(id)) {
-        sheet.appendRow([id, gmail]);
-    }
+function createRow(id) {
+  if (!exists(id)) {
+    sheet.appendRow([id]);
+  }
 }
 
 function setGmail(id, gmail) {
-    if (exists(id)) {
-        sheet.getRange(getRowByUserId(id), 2).setValue(gmail);
-    } else {
-        createRow(id, gmail);
-    }
+  if (!exists(id)) {
+    createRow(id);
+  }
+  sheet.getRange(getRowByUserId(id), 2).setValue(gmail);
 }
 
-/* 主にこれを使うことを推奨します。 */
+function setRemoToken(id, token) {
+
+  if (!exists(id)) {
+    createRow(id);
+  }
+
+  sheet
+    .getRange(getRowByUserId(id), 3)
+    .setValue(token);
+}
+
 function getUser(id) {
-    return getUserByRow(getRowByUserId(id));
+
+  const row = getRowByUserId(id);
+
+  if(row === -1){
+    return null;
+  }
+
+  return getUserByRow(row);
 }
 
-/* 使用非推奨 */
 function getRowByUserId(id) {
-    for (let i = 1; i <= sheet.getLastRow(); i++) {
-        if (sheet.getRange(i, 1).getValue() === id) {
-            return i;
-        }
+  for (let i = 1; i <= sheet.getLastRow(); i++) {
+    if (sheet.getRange(i, 1).getValue() === id) {
+      return i;
     }
-    return -1;
+  }
+  return -1;
 }
 
-/* 使用非推奨 */
 function getUserByRow(row) {
-    return new User(sheet.getRange(row, 1), sheet.getRange(row, 2));
+
+  return new User(
+    sheet.getRange(row, 1).getValue(),
+    sheet.getRange(row, 2).getValue(),
+    sheet.getRange(row, 3).getValue()
+  );
 }
 
 function exists(id) {
-    return getRowByUserId(id) !== -1;
+  return getRowByUserId(id) !== -1;
 }

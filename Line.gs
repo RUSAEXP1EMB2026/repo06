@@ -3,12 +3,15 @@ const channelAccessToken = "LYe+EcEVZU45iXW4cy+ANG3589Makj366+o5v5E3YEQU7UiUBrjR
 const COMMAND_HELP = "help";
 const COMMAND_REGISTER = "register";
 const COMMAND_TAG = "tag";
+const COMMAND_REMO = "remo";
+const COMMAND_CHECK = "check";
 
 const URL_LINE = "https://api.line.me/v2/bot/message/";
 const EP_PUSH = URL_LINE + "push";
 
 const LINE_SHEET_NAME = "line_log";
 
+/* イベントリスナー(?) */
 function doPost(e) {
     let sheet = getSheet(LINE_SHEET_NAME);
     JSON.parse(e.postData.contents).events.forEach(event => {
@@ -36,7 +39,7 @@ function doPost(e) {
                             let fragments = text.slice(1).split(" ");
                             let command = fragments[0];
                             fragments.shift();
-                            handleCommand(event, command, fragments);
+                            handleCommand(userId, command, fragments);
                         }
                         break;
                 }
@@ -52,6 +55,7 @@ function doPost(e) {
     })
 }
 
+/* ユーザーにダイレクトメッセージを送信する関数 */
 function sendTextMessage(userId, message) {
     const request = {
         to: userId,
@@ -72,8 +76,8 @@ function sendTextMessage(userId, message) {
     UrlFetchApp.fetch(EP_PUSH, options);
 }
 
-function handleCommand(event, command, args) {
-    let userId = event.source.userId;
+/* ユーザーコマンドを処理する関数 */
+function handleCommand(userId, command, args) {
     switch (command) {
         case COMMAND_HELP:
             sendTextMessage(userId, [
@@ -81,6 +85,8 @@ function handleCommand(event, command, args) {
                 "",
                 "!help: 各種コマンドの使用方法を表示",
                 "!register [Gmailアドレス]: Gmailアドレスを登録",
+                "!remo [アクセストークン]: Nature Remoのアクセストークンを登録",
+                "!check: Gmail,Remoのアクセストークンの登録情報を確認",
                 "!tag add [タグ名] [色番号] [所要時間(分)]: 所要時間タグを追加",
                 "!tag remove [タグ番号]: 所要時間タグを削除",
                 "!tag list: 所要時間タグの一覧を表示",
@@ -95,6 +101,23 @@ function handleCommand(event, command, args) {
             }else{
                 sendTextMessage(userId, "正しいGmailアドレスを入力してください。");
             }
+            break;
+        case COMMAND_REMO:
+            const token = args[0];
+            if(token){
+                setRemoToken(userId, token);
+                sendTextMessage(userId,"Nature Remoトークンを登録しました！");
+            }else{
+                sendTextMessage(userId,"アクセストークンを入力してください。");
+            }
+            break;
+        case COMMAND_CHECK:
+            const user = getUser(userId);
+            if(!user){
+                sendTextMessage(userId,"登録情報がありません。");
+            break;
+            }
+            sendTextMessage(userId,["登録情報","Gmail: " + user.gmail,"RemoToken: " + (user.remoToken? "登録済み": "未登録")].join("\n"));
             break;
         case COMMAND_TAG:
             let option = args[0];
@@ -130,7 +153,7 @@ function handleCommand(event, command, args) {
                     }
                     break;
                 case "color":
-                    sendTextMessage(userId, "色番号: 名前,\n" + COLOR_NAME_LIST.keys().map(key => (parseInt(key) + 1) + ": " + COLOR_NAME_LIST[key]).join(",\n"));
+                    sendTextMessage(userId, "色番号: 名前\n" + COLOR_NAME_LIST.map((name, index) => (index + 1) + ": " + name).join("\n"));
                     break;
                 default:
                     sendTextMessage(userId, "正しいオプションを指定してください。");

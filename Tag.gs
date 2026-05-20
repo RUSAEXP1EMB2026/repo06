@@ -1,5 +1,6 @@
 const TAG_SHEET_PREFIX = "TAG_";
 
+/* 指定したユーザーのタグを管理するシートを生成する関数 */
 function createTagSheet(userId) {
     if(getTagSheetByUserId(userId) == null) {
         const sheet = getSpreadSheet().insertSheet();
@@ -9,14 +10,26 @@ function createTagSheet(userId) {
     }
 }
 
+/* 指定した色に対応するTagInstanceを取得する関数 */
+function getTagByColor(userId, color) {
+  const tags = getTags(userId);
+  tags.forEach(tag => {
+    if(tag.color == color) return tag;
+  });
+  return tag;
+}
+
+/* 指定したユーザーのタグ管理シートを取得する関数 */
 function getTagSheetByUserId(userId) {
-    return getSheet(TAG_SHEET_PREFIX + userId);
+  return getSheet(TAG_SHEET_PREFIX + userId);
 }
 
+/* 色番号から対応する行番号を取得する関数 */
 function getRowByColor(color){
-    return parseInt(color) + 1;
+  return parseInt(color) + 1;
 }
 
+/* 指定したユーザーが設定したタグの配列を取得する関数 */
 function getTags(userId) {
     const sheet = getTagSheetByUserId(userId);
     let list = [];
@@ -30,6 +43,7 @@ function getTags(userId) {
     return list;
 }
 
+/* 指定したユーザーのタグを設定する関数 */
 function setTag(userId, name, minutes, color){
     let sheet = getTagSheetByUserId(userId);
     if(sheet === null) {

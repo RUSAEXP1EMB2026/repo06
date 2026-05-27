@@ -12,11 +12,9 @@ function createTagSheet(userId) {
 
 /* 指定した色に対応するTagInstanceを取得する関数 */
 function getTagByColor(userId, color) {
-  const tags = getTags(userId);
-  tags.forEach(tag => {
-    if(tag.color == color) return tag;
-  });
-  return tag;
+  const tag = getTags(userId).find(tag => tag.color === color);
+  /* 対応する色に対してタグが設定されていなかった場合、minutes=0の空のTagInstanceを返す */
+  return tag ?? new TagInstance("なし", 0, color);
 }
 
 /* 指定したユーザーのタグ管理シートを取得する関数 */
@@ -37,7 +35,7 @@ function getTags(userId) {
         const name = sheet.getRange(i + 1, 1).getValue();
         const minutes = sheet.getRange(i + 1, 2).getValue();
         if(name !== "" && minutes !== ""){
-            list.push(new TagInstance(name, minutes, i.toString()));
+            list.push(new TagInstance(name, parseInt(minutes), i.toString()));
         }
     }
     return list;

@@ -16,14 +16,11 @@ function setGmail(id, gmail) {
 }
 
 function setRemoToken(id, token) {
-
   if (!exists(id)) {
     createRow(id);
   }
 
-  sheet
-    .getRange(getRowByUserId(id), 3)
-    .setValue(token);
+  sheet.getRange(getRowByUserId(id), 3).setValue(token);
 }
 
 function getUser(id) {
@@ -37,6 +34,7 @@ function getUser(id) {
   return getUserByRow(row);
 }
 
+/* 使用非推奨 */
 function getRowByUserId(id) {
   for (let i = 1; i <= sheet.getLastRow(); i++) {
     if (sheet.getRange(i, 1).getValue() === id) {
@@ -45,7 +43,6 @@ function getRowByUserId(id) {
   }
   return -1;
 }
-
 function getUserByRow(row) {
 
   return new User(
@@ -58,3 +55,4 @@ function getUserByRow(row) {
 function exists(id) {
   return getRowByUserId(id) !== -1;
 }
+

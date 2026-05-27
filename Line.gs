@@ -7,7 +7,7 @@ const COMMAND_REMO = "remo";
 const COMMAND_CHECK = "check";
 
 const URL_LINE = "https://api.line.me/v2/bot/message/";
-const EP_PUSH = URL_LINE + "push";
+const ENDPOINT_PUSH = "push";
 
 const LINE_SHEET_NAME = "line_log";
 
@@ -52,7 +52,7 @@ function doPost(e) {
                 createTagSheet(userId);
                 break;
         }
-    })
+    });
 }
 
 /* ユーザーにダイレクトメッセージを送信する関数 */
@@ -73,7 +73,7 @@ function sendTextMessage(userId, message) {
         }
     }
 
-    UrlFetchApp.fetch(EP_PUSH, options);
+    UrlFetchApp.fetch(URL_LINE + ENDPOINT_PUSH, options);
 }
 
 /* ユーザーコマンドを処理する関数 */
@@ -87,7 +87,7 @@ function handleCommand(userId, command, args) {
                 "!register [Gmailアドレス]: Gmailアドレスを登録",
                 "!remo [アクセストークン]: Nature Remoのアクセストークンを登録",
                 "!check: Gmail,Remoのアクセストークンの登録情報を確認",
-                "!tag add [タグ名] [色番号] [所要時間(分)]: 所要時間タグを追加",
+                "!tag set [タグ名] [色番号] [所要時間(分)]: 所要時間タグを追加",
                 "!tag remove [タグ番号]: 所要時間タグを削除",
                 "!tag list: 所要時間タグの一覧を表示",
                 "!tag color: 使用可能な色の番号との対応を表示"
@@ -98,6 +98,7 @@ function handleCommand(userId, command, args) {
             if(email.match(/.+@gmail\.com$/)){
                 setGmail(userId, email);
                 sendTextMessage(userId, "Gmailアドレスの登録に成功しました！");
+                rebuildTodaySchedules();
             }else{
                 sendTextMessage(userId, "正しいGmailアドレスを入力してください。");
             }
@@ -117,19 +118,19 @@ function handleCommand(userId, command, args) {
                 sendTextMessage(userId,"登録情報がありません。");
             break;
             }
-            sendTextMessage(userId,["登録情報","Gmail: " + user.gmail,"RemoToken: " + (user.remoToken? "登録済み": "未登録")].join("\n"));
+            sendTextMessage(userId,["登録情報","Gmail: " + (user.gmail ? "登録済み": "未登録"), "RemoToken: " + (user.remoToken ? "登録済み": "未登録")].join("\n"));
             break;
         case COMMAND_TAG:
             let option = args[0];
             let tag;
             let color;
             switch(option){
-                case "add":
+                case "set":
                     tag = args[1];
                     color = args[2];
                     let minutes = args[3];
                     if(1 <= parseInt(color) && parseInt(color) <= 11 && isFinite(minutes)){
-                        setTag(userId, tag, minutes, color);
+                        setTag(userId, tag, parseInt(minutes), color);
                         sendTextMessage(userId, "タグを追加しました。");
                     }else{
                         sendTextMessage(userId, "正しい引数を指定してください。");
@@ -147,7 +148,7 @@ function handleCommand(userId, command, args) {
                 case "list":
                     const list = getTags(userId);
                     if(getTags(userId).length > 0) {
-                        sendTextMessage(userId, list.map(tag => "タグ番号" + tag.color + ": {タグ名: " + tag.name + ", 所要時間: " + tag.minutes + "分}").join(",\n"));
+                        sendTextMessage(userId, list.map(tag => "タグ番号" + tag.color + "(" + COLOR_NAME_LIST[tag.color - 1] + ")" + ": {タグ名: " + tag.name + ", 所要時間: " + tag.minutes + "分}").join(",\n"));
                     }else{
                         sendTextMessage(userId, "タグが設定されていません。");
                     }

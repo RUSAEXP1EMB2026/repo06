@@ -15,7 +15,7 @@ function getTravelMinutesByCalendarColor(userId, color) {
     return DEFAULT_TRAVEL_MINUTES;
   }
 
-  return Number(minutes);
+  return parseInt(minutes);
 }
 
 /*

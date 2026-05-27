@@ -1,0 +1,24 @@
+{
+  "name": "schedule_alarm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "line.gs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RUSAEXP1EMB2026/repo06.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RUSAEXP1EMB2026/repo06/issues"
+  },
+  "homepage": "https://github.com/RUSAEXP1EMB2026/repo06#readme",
+  "devDependencies": {
+    "@types/google-apps-script": "^2.0.8"
+  }
+}
